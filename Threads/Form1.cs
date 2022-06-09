@@ -31,8 +31,19 @@ namespace Threads
             //thread2.Start();
             //writetoFileAsync1();
             //writetoFileAsync2();
+            
+            moveProgressBar();
         }
+        
+        private void moveProgressBar()
+        {
+            while (progressBar1.Value != 100)
+            {
+                progressBar1.Value++;
+            }
 
+        }
+        
         private void writeToFile1()
         {
             string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread1.txt";
