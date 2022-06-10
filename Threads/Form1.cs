@@ -23,7 +23,6 @@ namespace Threads
 
         async private void button1_Click(object sender, EventArgs e)
         {
-            progressBar1.Value = 0;
 
             string source = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread1.txt";
             string destination = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread3.txt";
@@ -38,21 +37,56 @@ namespace Threads
         private void writeToFile1()
         {
             string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread1.txt";
-            using (StreamWriter sw = File.AppendText(path))
-                for (int i = 0; i < 10000000; i++)
+            try {
+                using (StreamWriter sw = File.AppendText(path))
                 {
-                    sw.WriteLine(i.ToString());
+                    progressBar1.Value = 0;
+                    for (int i = 0; i < 10000000; i++)
+                    {
+                        sw.WriteLine(i.ToString());
+                        if (i % 100000 == 0 || progressBar1.Value != 100)
+                        {
+                            if (progressBar1.Value != 100)
+                            {
+                                progressBar1.Value++;
+                            }
+                        }
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+
+            }
+            
         }
 
         private void writeToFile2()
         {
             string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread2.txt";
-            using (StreamWriter sw = File.AppendText(path))
-                for (int i = 0; i < 10000000; i++)
+            try
+            {
+                using (StreamWriter sw = File.AppendText(path))
                 {
-                    sw.WriteLine(i.ToString());
+                    progressBar1.Value = 0;
+                    for (int i = 0; i < 10000000; i++)
+                    {
+                        sw.WriteLine(i.ToString());
+                        if (i % 100000 == 0 || progressBar1.Value != 100)
+                        {
+                            if (progressBar1.Value != 100)
+                            {
+                                progressBar1.Value++;
+                            }
+                        }
+                    }
                 }
+                    
+            }
+            catch (Exception e)
+            {
+
+            }
         }
 
         async private void writetoFileAsync1()
@@ -60,12 +94,40 @@ namespace Threads
             string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread1.txt";
             await Task.Run(async () =>
               {
-                  using (StreamWriter sw = File.AppendText(path))
-                      for (int i = 0; i < 40000000; i++)
+                  try {
+                      using (StreamWriter sw = File.AppendText(path))
                       {
-                          sw.WriteLine(i.ToString());
-                          //await Task.Delay(10);
-                      }
+                          progressBar1.Value = 0;
+                          for (int i = 0; i < 40000000; i++)
+                          {
+                              sw.WriteLine(i.ToString());
+                              if (i % 400000 == 0)
+                              {
+                                  MethodInvoker methodInvoker = new MethodInvoker(() =>
+                                  {
+                                      if (progressBar1.Value != 100)
+                                      {
+                                          progressBar1.Value++;
+                                      }
+                                  });
+
+                                  if (progressBar1.InvokeRequired)
+                                  {
+                                      progressBar1.Invoke(methodInvoker);
+                                  }
+                                  else
+                                  {
+                                      methodInvoker.Invoke();
+                                  }
+                              }
+                          }
+                      }    
+                  }
+                  catch( Exception e)
+                  {
+
+                  }
+                  
               });
 
         }
@@ -75,12 +137,40 @@ namespace Threads
             string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread2.txt";
             await Task.Run(async () =>
             {
-                using (StreamWriter sw = File.AppendText(path))
-                    for (int i = 0; i < 40000000; i++)
+                try
+                {
+                    using (StreamWriter sw = File.AppendText(path))
                     {
-                        sw.WriteLine(i.ToString());
-                        //await Task.Delay(10);
+                        progressBar1.Value = 0;
+                        for (int i = 0; i < 40000000; i++)
+                        {
+                            sw.WriteLine(i.ToString());
+                            if (i % 400000 == 0)
+                            {
+                                MethodInvoker methodInvoker = new MethodInvoker(() =>
+                                {
+                                    if (progressBar1.Value != 100)
+                                    {
+                                        progressBar1.Value++;
+                                    }
+                                });
+
+                                if (progressBar1.InvokeRequired)
+                                {
+                                    progressBar1.Invoke(methodInvoker);
+                                }
+                                else
+                                {
+                                    methodInvoker.Invoke();
+                                }
+                            }
+                        }
                     }
+                }
+                catch (Exception e)
+                {
+
+                }
             });
 
         }
@@ -88,23 +178,77 @@ namespace Threads
         private void writeToFileThread1()
         {
             string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread1.txt";
-            using (StreamWriter sw = File.AppendText(path))
-                for (int i = 0; i < 100; i++)
+            try
+            {
+                using (StreamWriter sw = File.AppendText(path))
                 {
-                    sw.WriteLine(i.ToString());
-                    Thread.Sleep(50);
+                    progressBar1.Value = 0;
+                    for (int i = 0; i < 100; i++)
+                    {
+                        sw.WriteLine(i.ToString());
+                        MethodInvoker methodInvoker = new MethodInvoker(() =>
+                        {
+                            if (progressBar1.Value != 100)
+                            {
+                                progressBar1.Value++;
+                            }
+                        });
+
+                        if (progressBar1.InvokeRequired)
+                        {
+                            progressBar1.Invoke(methodInvoker);
+                        }
+                        else
+                        {
+                            methodInvoker.Invoke();
+                        }
+                        Thread.Sleep(50);
+                    }
                 }
+                    
+            }
+            catch(Exception e)
+            {
+
+            }
+            
         }
 
         private void writeToFileThread2()
         {
             string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread2.txt";
-            using (StreamWriter sw = File.AppendText(path))
-                for (int i = 0; i < 100; i++)
+            try
+            {
+                using (StreamWriter sw = File.AppendText(path))
                 {
-                    sw.WriteLine(i.ToString());
-                    Thread.Sleep(50);
+                    progressBar1.Value = 0;
+                    for (int i = 0; i < 100; i++)
+                    {
+                        sw.WriteLine(i.ToString());
+                        MethodInvoker methodInvoker = new MethodInvoker(() =>
+                        {
+                            if (progressBar1.Value != 100)
+                            {
+                                progressBar1.Value++;
+                            }
+                        });
+
+                        if (progressBar1.InvokeRequired)
+                        {
+                            progressBar1.Invoke(methodInvoker);
+                        }
+                        else
+                        {
+                            methodInvoker.Invoke();
+                        }
+                        Thread.Sleep(50);
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+
+            }
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -223,7 +367,6 @@ namespace Threads
 
         private void button7_Click(object sender, EventArgs e)
         {
-            progressBar1.Value = 0;
 
             string source = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread1.txt";
             string destination = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread3.txt";
