@@ -39,11 +39,22 @@ namespace Threads
             CustomFileCopier customFileCopier = new CustomFileCopier(source,destination, ref progressBar1);
 
             //запуск копирования на отдельном потоке, прогрессбар работает нормально
-            Thread thread3 = new Thread(customFileCopier.Copy);
-            thread3.Start();
+            //Thread thread3 = new Thread(customFileCopier.Copy);
+            //thread3.Start();
 
             //запуск копирования на главном потоке, обновление прогрессбар работает неисправно
-            //customFileCopier.Copy();
+            customFileCopier.Copy();
+
+            
+            moveProgressBar();
+        }
+        
+        private void moveProgressBar()
+        {
+            while (progressBar1.Value != 100)
+            {
+                progressBar1.Value++;
+            }
 
         }
         
@@ -129,7 +140,7 @@ namespace Threads
             label2.Text = "Quack";
         }
 
-        public delegate void ProgressChangeDelegate(double Percentage, ref bool Cancel);
+        public delegate void ProgressChangeDelegate(double Percentage);
         public delegate void Completedelegate();
 
 
@@ -148,7 +159,7 @@ namespace Threads
             public void Copy()
             {
                 byte[] buffer = new byte[1024 * 1024]; 
-                bool cancelFlag = false;
+                //bool cancelFlag = false;
 
                 using (FileStream source = new FileStream(SourceFilePath, FileMode.Open, FileAccess.Read))
                 {
@@ -165,9 +176,7 @@ namespace Threads
 
                             dest.Write(buffer, 0, currentBlockSize);
 
-                            cancelFlag = false;
-                            OnProgressChanged(percentage, ref cancelFlag);
-
+                            OnProgressChanged(percentage);
                             MethodInvoker methodInvoker = new MethodInvoker(() =>
                             {
 
@@ -195,12 +204,6 @@ namespace Threads
                                 Console.WriteLine(e.Message);
                             }
                             
-
-                            if (cancelFlag == true)
-                            {
-                                File.Delete(DestFilePath);
-                                break;
-                            }
                         }
                     }
                 }
