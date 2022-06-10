@@ -46,7 +46,7 @@ namespace Threads
             //customFileCopier.Copy();
 
         }
-
+        
         private void writeToFile1()
         {
             string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread1.txt";
