@@ -22,39 +22,16 @@ namespace Threads
         }
 
         async private void button1_Click(object sender, EventArgs e)
-        {   
-            //Методы для создания и записи в файлы Thread1.txt Thread2.txt (просто используйте их для создания файлов)
-            //writeToFile1();
-            //writeToFile2();
-            //Thread thread1 = new Thread(writeToFileThread1);
-            //Thread thread2 = new Thread(writeToFileThread2);
-            //thread1.Start();
-            //thread2.Start();
-            //writetoFileAsync1();
-            //writetoFileAsync2();
+        {
+            progressBar1.Value = 0;
 
             string source = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread1.txt";
             string destination = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread3.txt";
 
             CustomFileCopier customFileCopier = new CustomFileCopier(source,destination, ref progressBar1);
 
-            //запуск копирования на отдельном потоке, прогрессбар работает нормально
-            //Thread thread3 = new Thread(customFileCopier.Copy);
-            //thread3.Start();
-
-            //запуск копирования на главном потоке, обновление прогрессбар работает неисправно
             customFileCopier.Copy();
 
-            
-            moveProgressBar();
-        }
-        
-        private void moveProgressBar()
-        {
-            while (progressBar1.Value != 100)
-            {
-                progressBar1.Value++;
-            }
 
         }
         
@@ -159,7 +136,11 @@ namespace Threads
             public void Copy()
             {
                 byte[] buffer = new byte[1024 * 1024]; 
-                //bool cancelFlag = false;
+
+                if (File.Exists(DestFilePath))
+                {
+                    File.Delete(DestFilePath);
+                }
 
                 using (FileStream source = new FileStream(SourceFilePath, FileMode.Open, FileAccess.Read))
                 {
@@ -218,6 +199,40 @@ namespace Threads
 
             public event ProgressChangeDelegate OnProgressChanged;
             public event Completedelegate OnComplete;
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            writeToFile1();
+            writeToFile2();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Thread thread1 = new Thread(writeToFileThread1);
+            Thread thread2 = new Thread(writeToFileThread2);
+            thread1.Start();
+            thread2.Start();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            writetoFileAsync1();
+            writetoFileAsync2();
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            progressBar1.Value = 0;
+
+            string source = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread1.txt";
+            string destination = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread3.txt";
+
+            CustomFileCopier customFileCopier = new CustomFileCopier(source, destination, ref progressBar1);
+
+            Thread thread3 = new Thread(customFileCopier.Copy);
+            thread3.Start();
+
         }
     }
 }
