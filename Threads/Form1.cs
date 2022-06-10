@@ -288,6 +288,11 @@ namespace Threads
 
                 using (FileStream source = new FileStream(SourceFilePath, FileMode.Open, FileAccess.Read))
                 {
+                    MethodInvoker methodInvoker1 = new MethodInvoker(() =>
+                    {
+                        progressBar.Value = 0;
+                    });
+                    progressBar.Invoke(methodInvoker1);
                     long fileLength = source.Length;
                     using (FileStream dest = new FileStream(DestFilePath, FileMode.CreateNew, FileAccess.Write))
                     {
