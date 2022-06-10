@@ -22,7 +22,8 @@ namespace Threads
         }
 
         async private void button1_Click(object sender, EventArgs e)
-        {
+        {   
+            //Методы для создания и записи в файлы Thread1.txt Thread2.txt (просто используйте их для создания файлов)
             //writeToFile1();
             //writeToFile2();
             //Thread thread1 = new Thread(writeToFileThread1);
@@ -31,6 +32,19 @@ namespace Threads
             //thread2.Start();
             //writetoFileAsync1();
             //writetoFileAsync2();
+
+            string source = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread1.txt";
+            string destination = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread3.txt";
+
+            CustomFileCopier customFileCopier = new CustomFileCopier(source,destination, ref progressBar1);
+
+            //запуск копирования на отдельном потоке, прогрессбар работает нормально
+            Thread thread3 = new Thread(customFileCopier.Copy);
+            thread3.Start();
+
+            //запуск копирования на главном потоке, обновление прогрессбар работает неисправно
+            //customFileCopier.Copy();
+
         }
 
         private void writeToFile1()
@@ -65,7 +79,7 @@ namespace Threads
                           //await Task.Delay(10);
                       }
               });
-          
+
         }
 
         async private void writetoFileAsync2()
@@ -87,7 +101,7 @@ namespace Threads
         {
             string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Thread1.txt";
             using (StreamWriter sw = File.AppendText(path))
-                for (int i = 0; i <100; i++)
+                for (int i = 0; i < 100; i++)
                 {
                     sw.WriteLine(i.ToString());
                     Thread.Sleep(50);
@@ -113,6 +127,94 @@ namespace Threads
         private void button3_Click(object sender, EventArgs e)
         {
             label2.Text = "Quack";
+        }
+
+        public delegate void ProgressChangeDelegate(double Percentage, ref bool Cancel);
+        public delegate void Completedelegate();
+
+
+        class CustomFileCopier
+        {
+            public CustomFileCopier(string Source, string Dest, ref ProgressBar bar)
+            {
+                this.SourceFilePath = Source;
+                this.DestFilePath = Dest;
+                this.progressBar = bar;
+
+                OnProgressChanged += delegate { };
+                OnComplete += delegate { };
+            }
+
+            public void Copy()
+            {
+                byte[] buffer = new byte[1024 * 1024]; 
+                bool cancelFlag = false;
+
+                using (FileStream source = new FileStream(SourceFilePath, FileMode.Open, FileAccess.Read))
+                {
+                    long fileLength = source.Length;
+                    using (FileStream dest = new FileStream(DestFilePath, FileMode.CreateNew, FileAccess.Write))
+                    {
+                        long totalBytes = 0;
+                        int currentBlockSize = 0;
+
+                        while ((currentBlockSize = source.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            totalBytes += currentBlockSize;
+                            double percentage = (double)totalBytes * 100.0 / fileLength;
+
+                            dest.Write(buffer, 0, currentBlockSize);
+
+                            cancelFlag = false;
+                            OnProgressChanged(percentage, ref cancelFlag);
+
+                            MethodInvoker methodInvoker = new MethodInvoker(() =>
+                            {
+
+                                if (progressBar.Value + (int)percentage > 100)
+                                {
+                                    progressBar.Value = 100;
+                                }
+                                else
+                                {
+                                    progressBar.Value += (int)percentage;
+                                }
+                            });
+                            try {
+                                if (progressBar.InvokeRequired)
+                                {
+                                    progressBar.Invoke(methodInvoker);
+                                }
+                                else
+                                {
+                                    methodInvoker.Invoke();
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e.Message);
+                            }
+                            
+
+                            if (cancelFlag == true)
+                            {
+                                File.Delete(DestFilePath);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                OnComplete();
+            }
+
+            public string SourceFilePath { get; set; }
+            public string DestFilePath { get; set; }
+
+            public ProgressBar progressBar { get; set; }
+
+            public event ProgressChangeDelegate OnProgressChanged;
+            public event Completedelegate OnComplete;
         }
     }
 }
